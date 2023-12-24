@@ -3,8 +3,8 @@ from sqlalchemy import MetaData, Table, Column, Integer, String, ForeignKey, Enu
 metadata = MetaData()
 
 
-user = Table(
-    'user',
+users = Table(
+    'users',
     metadata,
     Column('id', Integer, primary_key=True),
     Column('username', String, unique=True),
@@ -17,7 +17,7 @@ task_list = Table(
     'task_list',
     metadata,
     Column('id', Integer, primary_key=True),
-    Column('user_id', Integer, ForeignKey('user.id')),
+    Column('user_id', Integer, ForeignKey('users.id')),
     Column('name', String, nullable=False),
 )
 
