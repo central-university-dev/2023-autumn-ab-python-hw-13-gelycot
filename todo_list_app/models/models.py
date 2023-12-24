@@ -10,6 +10,7 @@ user = Table(
     Column('username', String, unique=True),
     Column('password_hash', String, nullable=False),
     Column('role', Enum('admin', 'user', name='user_roles'), default='user'),
+    Column('salt', String, nullable=False),
 )
 
 task_list = Table(
