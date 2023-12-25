@@ -40,7 +40,7 @@ class ApiRouter:
                 path = path_with_params
             for param in inspect.signature(funk).parameters.values():
                 param_type = param.annotation
-                if param_type:
+                if param_type and param.name != 'scope':
                     param_types.append(param_type)
             self.routes.append([path + 'GET', funk, param_types, privat])
             return funk
@@ -59,7 +59,7 @@ class ApiRouter:
                     if data:
                         for param_type, param in zip(route_info[2], data.values()):
                             params.append(param_type(param))
-                    body = route_info[1](*params)
+                    body = route_info[1](*params, **{'scope': scope})
         else:
             for route_info in self.routes:
                 if path + scope['method'] == route_info[0]:
@@ -67,9 +67,9 @@ class ApiRouter:
                         body = 'Send correct jwt token'
                         break
                     if route_info[2] is None:
-                        body = route_info[1]()
+                        body = route_info[1](**{'scope': scope})
                     else:
-                        body = route_info[1](route_info[2](**data))
+                        body= route_info[1](route_info[2](**data, **{'scope': scope}))
 
         if isinstance(body, BaseModel):
             body = body.model_dump_json()
