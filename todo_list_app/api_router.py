@@ -15,34 +15,23 @@ class ApiRouter:
 
     def post(self, path, privat=False):
         def wrapper(funk):
-            param_type = None
-            for param in inspect.signature(funk).parameters.values():
-                param_type = param.annotation
-            self.routes.append([path + 'POST', funk, param_type, privat])
+            self.routes.append([path + 'POST', funk, privat])
             return funk
         return wrapper
 
     def delete(self, path, privat=False):
         def wrapper(funk):
-            param_type = None
-            for param in inspect.signature(funk).parameters.values():
-                param_type = param.annotation
-            self.routes.append([path + 'DELETE', funk, param_type, privat])
+            self.routes.append([path + 'DELETE', funk, privat])
             return funk
         return wrapper
 
     def get(self, path_with_params: str, privat=False):
         def wrapper(funk):
-            param_types = []
             if '|' in path_with_params:
                 path = path_with_params[:path_with_params.index('|')]
             else:
                 path = path_with_params
-            for param in inspect.signature(funk).parameters.values():
-                param_type = param.annotation
-                if param_type and param.name != 'scope':
-                    param_types.append(param_type)
-            self.routes.append([path + 'GET', funk, param_types, privat])
+            self.routes.append([path + 'GET', funk, privat])
             return funk
 
         return wrapper
@@ -52,24 +41,33 @@ class ApiRouter:
         if scope['method'] == 'GET':
             for route_info in self.routes:
                 if path + scope['method'] == route_info[0]:
-                    if route_info[3] and not self._check_authentication(scope):
+                    funk = route_info[1]
+                    if route_info[2] and not self._check_authentication(scope):
                         body = 'Send correct jwt token'
                         break
                     params = []
+                    kwargs = {}
                     if data:
-                        for param_type, param in zip(route_info[2], data.values()):
-                            params.append(param_type(param))
-                    body = route_info[1](*params, **{'scope': scope})
+                        for param, param_value in zip(inspect.signature(funk).parameters.values(), data.values()):
+                            if param.name != 'scope':
+                                params.append(param.annotation(param_value))
+                            else:
+                                kwargs = {'scope': scope}
+                    body = funk(*params, **kwargs)
         else:
             for route_info in self.routes:
                 if path + scope['method'] == route_info[0]:
-                    if route_info[3] and not self._check_authentication(scope):
+                    funk = route_info[1]
+                    if route_info[2] and not self._check_authentication(scope):
                         body = 'Send correct jwt token'
                         break
-                    if route_info[2] is None:
-                        body = route_info[1](**{'scope': scope})
-                    else:
-                        body= route_info[1](route_info[2](**data, **{'scope': scope}))
+                    kwargs = {}
+                    for param in inspect.signature(funk).parameters.values():
+                        if param.name != 'scope':
+                            kwargs[f'{param.name}'] = param.annotation(**data)
+                        else:
+                            kwargs['scope'] = scope
+                    body = funk(**kwargs)
 
         if isinstance(body, BaseModel):
             body = body.model_dump_json()
@@ -89,6 +87,7 @@ class ApiRouter:
             current_time = datetime.utcnow()
             expiration_time = decoded_token.get('exp', 0)
             if current_time < datetime.utcfromtimestamp(expiration_time):
+                scope['token_data'] = decoded_token
                 return True
             else:
                 return False
@@ -100,6 +99,7 @@ class ApiRouter:
 
     def include_routes(self, api_router: 'ApiRouter'):
         self.routes += api_router.routes
+        return self
 
 
 router = ApiRouter()

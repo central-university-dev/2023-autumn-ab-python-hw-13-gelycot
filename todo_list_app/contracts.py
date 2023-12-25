@@ -14,3 +14,12 @@ class LoginUser(BaseModel):
 class RegisterUserResponse(BaseModel):
     id: int
     username: str
+
+
+class CreateTaskList(BaseModel):
+    name: str
+
+
+class CreateTask(BaseModel):
+    list_id: int
+    name: str
