@@ -19,6 +19,12 @@ class ApiRouter:
             return funk
         return wrapper
 
+    def put(self, path, privat=False):
+        def wrapper(funk):
+            self.routes.append([path + 'PUT', funk, privat])
+            return funk
+        return wrapper
+
     def delete(self, path, privat=False):
         def wrapper(funk):
             self.routes.append([path + 'DELETE', funk, privat])
@@ -45,15 +51,14 @@ class ApiRouter:
                     if route_info[2] and not self._check_authentication(scope):
                         body = 'Send correct jwt token'
                         break
-                    params = []
                     kwargs = {}
                     if data:
                         for param, param_value in zip(inspect.signature(funk).parameters.values(), data.values()):
                             if param.name != 'scope':
-                                params.append(param.annotation(param_value))
+                                kwargs[f'{param.name}'] = param.annotation(param_value)
                             else:
                                 kwargs = {'scope': scope}
-                    body = funk(*params, **kwargs)
+                    body = funk(**kwargs)
         else:
             for route_info in self.routes:
                 if path + scope['method'] == route_info[0]:

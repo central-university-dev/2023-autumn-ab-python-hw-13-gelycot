@@ -1,5 +1,3 @@
-from urllib.parse import unquote
-
 from todo_list_app.api_router import ApiRouter
 from todo_list_app.api_router import router
 from todo_list_app.auth import router as auth_router

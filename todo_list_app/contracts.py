@@ -23,3 +23,8 @@ class CreateTaskList(BaseModel):
 class CreateTask(BaseModel):
     list_id: int
     name: str
+
+
+class UpdateTaskList(BaseModel):
+    name: str
+    list_id: int
