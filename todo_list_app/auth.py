@@ -37,8 +37,8 @@ def login_for_access_token(user: LoginUser):
     if bcrypt.checkpw(provided_password.encode('UTF-8'), db_user.password_hash.encode('UTF-8')):
         expiration_time = datetime.utcnow() + timedelta(minutes=10)
         token_payload = {
-            'username': username,
             'id': db_user.id,
+            'role': db_user.role,
             'exp': expiration_time
         }
         jwt_token = jwt.encode(token_payload, JWT_SECRET_KEY, algorithm='HS256')
