@@ -13,31 +13,31 @@ class ApiRouter:
     def __init__(self):
         self.routes = []
 
-    def post(self, path, privat=False):
+    def post(self, path, private=False):
         def wrapper(funk):
-            self.routes.append([path + 'POST', funk, privat])
+            self.routes.append([path + 'POST', funk, private])
             return funk
         return wrapper
 
-    def put(self, path, privat=False):
+    def put(self, path, private=False):
         def wrapper(funk):
-            self.routes.append([path + 'PUT', funk, privat])
+            self.routes.append([path + 'PUT', funk, private])
             return funk
         return wrapper
 
-    def delete(self, path, privat=False):
+    def delete(self, path, private=False):
         def wrapper(funk):
-            self.routes.append([path + 'DELETE', funk, privat])
+            self.routes.append([path + 'DELETE', funk, private])
             return funk
         return wrapper
 
-    def get(self, path_with_params: str, privat=False):
+    def get(self, path_with_params: str, private=False):
         def wrapper(funk):
             if '|' in path_with_params:
                 path = path_with_params[:path_with_params.index('|')]
             else:
                 path = path_with_params
-            self.routes.append([path + 'GET', funk, privat])
+            self.routes.append([path + 'GET', funk, private])
             return funk
 
         return wrapper

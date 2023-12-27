@@ -5,7 +5,7 @@ from todo_list_app.database import get_session, TaskList, Task
 router = ApiRouter()
 
 
-@router.post('/create-task-list', privat=True)
+@router.post('/create-task-list', private=True)
 def create_task_list(task_list: CreateTaskList, scope):
     token_data = scope['token_data']
     user_id = token_data['id']
@@ -20,7 +20,7 @@ def create_task_list(task_list: CreateTaskList, scope):
     return {'task_list_id': task_list_id, 'task_list_name': task_list_name}
 
 
-@router.post('/create-task', privat=True)
+@router.post('/create-task', private=True)
 def create_task(task: CreateTask, scope):
     token_data = scope['token_data']
     user_id = token_data['id']
@@ -44,7 +44,7 @@ def create_task(task: CreateTask, scope):
     return {'task_id': task_id, 'task_name': task_name}
 
 
-@router.put('/update-task-list', privat=True)
+@router.put('/update-task-list', private=True)
 def update_task_list(updated_task_list: UpdateTaskList, scope):
     token_data = scope['token_data']
     user_id = token_data['id']

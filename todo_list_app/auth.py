@@ -11,7 +11,7 @@ from todo_list_app.api_router import ApiRouter
 router = ApiRouter()
 
 
-@router.post("/register", privat=False)
+@router.post("/register", private=False)
 def register(user: RegisterUser):
     user_salt = bcrypt.gensalt()
 
@@ -27,7 +27,7 @@ def register(user: RegisterUser):
     return RegisterUserResponse(id=new_user_id, username=new_user_username)
 
 
-@router.post("/token", privat=False)
+@router.post("/token", private=False)
 def login_for_access_token(user: LoginUser):
     username = user.username
     provided_password = user.password
