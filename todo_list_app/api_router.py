@@ -44,6 +44,7 @@ class ApiRouter:
 
     def check_api_route(self, scope, path, data):
         method = scope['method']
+        body = ''
 
         for route_info in self.routes:
             route_path, funk, requires_authentication = route_info

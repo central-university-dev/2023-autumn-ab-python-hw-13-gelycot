@@ -18,6 +18,8 @@ class App:
             data = scope['query_string']
             if data:
                 data = self.parse_body(data)
+            else:
+                data = {}
         else:
             data = await self.read_body(receive)
         path = scope['path']
