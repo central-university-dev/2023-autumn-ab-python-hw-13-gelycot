@@ -43,36 +43,17 @@ class ApiRouter:
         return wrapper
 
     def check_api_route(self, scope, path, data):
-        body = ''
-        if scope['method'] == 'GET':
-            for route_info in self.routes:
-                if path + scope['method'] == route_info[0]:
-                    funk = route_info[1]
-                    if route_info[2] and not self._check_authentication(scope):
-                        body = 'Send correct jwt token'
-                        break
-                    kwargs = {}
-                    if data:
-                        for param, param_value in zip(inspect.signature(funk).parameters.values(), data.values()):
-                            if param.name != 'scope':
-                                kwargs[f'{param.name}'] = param.annotation(param_value)
-                            else:
-                                kwargs = {'scope': scope}
-                    body = funk(**kwargs)
-        else:
-            for route_info in self.routes:
-                if path + scope['method'] == route_info[0]:
-                    funk = route_info[1]
-                    if route_info[2] and not self._check_authentication(scope):
-                        body = 'Send correct jwt token'
-                        break
-                    kwargs = {}
-                    for param in inspect.signature(funk).parameters.values():
-                        if param.name != 'scope':
-                            kwargs[f'{param.name}'] = param.annotation(**data)
-                        else:
-                            kwargs['scope'] = scope
-                    body = funk(**kwargs)
+        method = scope['method']
+
+        for route_info in self.routes:
+            route_path, funk, requires_authentication = route_info
+
+            if path + method == route_path:
+                if requires_authentication and not self._check_authentication(scope):
+                    body = 'Send correct jwt token'
+                    break
+                kwargs = self._parse_data_into_kwargs(data, funk, scope)
+                body = funk(**kwargs)
 
         if isinstance(body, BaseModel):
             body = body.model_dump_json()
@@ -101,6 +82,23 @@ class ApiRouter:
             return False
         except jwt.InvalidTokenError:
             return False
+
+    @staticmethod
+    def _parse_data_into_kwargs(data, funk, scope):
+        for param in inspect.signature(funk).parameters.values():
+            if param.name == 'scope':
+                data['scope'] = scope
+            elif param.name not in data:
+                addition_kwarg = {}
+                for param_name in inspect.signature(param.annotation).parameters.keys():
+                    addition_kwarg[param_name] = data[param_name]
+                    del data[param_name]
+
+                data[param.name] = param.annotation(**addition_kwarg)
+            else:
+                data[param.name] = param.annotation(data[param.name])
+
+        return data
 
     def include_routes(self, api_router: 'ApiRouter'):
         self.routes += api_router.routes
