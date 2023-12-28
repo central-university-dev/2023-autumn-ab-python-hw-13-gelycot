@@ -43,3 +43,11 @@ def update_task_list_db(task_list_id, new_name):
         session.commit()
         session.refresh(task_list)
         return task_list
+
+
+def delete_task_list_db(task_list_id: int):
+    with get_session() as session:
+        task_list = session.query(TaskList).filter(TaskList.id == task_list_id).first()
+
+        session.delete(task_list)
+        session.commit()

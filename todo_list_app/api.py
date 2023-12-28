@@ -1,7 +1,7 @@
 from todo_list_app.api_router import ApiRouter
 from todo_list_app.contracts import CreateTaskList, CreateTask, UpdateTaskList
 from todo_list_app.crud import create_task_list_db, get_task_list_by_id_db, create_task_db, update_task_list_db, \
-    get_tasks_by_list_id_db
+    get_tasks_by_list_id_db, delete_task_list_db
 from todo_list_app.database import get_session, TaskList, Task
 
 router = ApiRouter()
@@ -73,3 +73,23 @@ def update_task_list(updated_task_list: UpdateTaskList, scope):
     updated_task_list = update_task_list_db(updated_task_list.list_id, updated_task_list.name)
 
     return {'updated_task_list_name': updated_task_list.name}
+
+
+@router.delete('/delete-task-list', private=True)
+def delete_task_list(list_id: int, scope):
+    token_data = scope['token_data']
+    user_id = token_data['id']
+
+    task_list = get_task_list_by_id_db(list_id)
+
+    if task_list is None:
+        return {'error': 'Task list not found.'}
+
+    if task_list.user_id != user_id:
+        return {'error': 'You do not have permission to delete this task list.'}
+
+    deleted_task_list_name = task_list.name
+
+    delete_task_list_db(list_id)
+
+    return {'message': f'Task list "{deleted_task_list_name}" deleted successfully.'}
