@@ -1,4 +1,13 @@
-from todo_list_app.database import get_session, TaskList, Task
+from todo_list_app.database import get_session, TaskList, Task, User
+
+
+def create_user_db(username, password_hash, salt):
+    with get_session() as session:
+        new_user = User(username=username, password_hash=password_hash, salt=salt)
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+        return new_user
 
 
 def get_task_list_by_id_db(task_list_id):

@@ -5,6 +5,7 @@ import jwt
 
 from todo_list_app.config import JWT_SECRET_KEY
 from todo_list_app.contracts import RegisterUser, RegisterUserResponse, LoginUser
+from todo_list_app.crud import create_user_db
 from todo_list_app.database import User, get_session
 from todo_list_app.api_router import ApiRouter
 
@@ -16,15 +17,9 @@ def register(user: RegisterUser):
     user_salt = bcrypt.gensalt()
 
     password_hash = bcrypt.hashpw(user.password.encode('UTF-8'), user_salt)
-    new_user = User(username=user.username, password_hash=password_hash.decode('UTF-8'), salt=user_salt.decode('UTF-8'))
-    with get_session() as session:
-        session.add(new_user)
-        session.commit()
-        session.refresh(new_user)
-        new_user_id = new_user.id
-        new_user_username = new_user.username
+    new_user = create_user_db(user.username, password_hash.decode('UTF-8'), user_salt.decode('UTF-8'))
 
-    return RegisterUserResponse(id=new_user_id, username=new_user_username)
+    return RegisterUserResponse(id=new_user.id, username=new_user.username)
 
 
 @router.post("/token", private=False)
@@ -46,3 +41,7 @@ def login_for_access_token(user: LoginUser):
     else:
         return {'detail': 'Unauthorized'}
 
+
+@router.get('/get', private=False)
+def get_some():
+    return 'YES'
