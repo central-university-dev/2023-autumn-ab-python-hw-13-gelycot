@@ -1,5 +1,3 @@
-from sqlalchemy import select
-
 from todo_list_app.database import get_session, TaskList, Task
 
 
@@ -51,3 +49,26 @@ def delete_task_list_db(task_list_id: int):
 
         session.delete(task_list)
         session.commit()
+
+
+def delete_task_db(task_id: int):
+    with get_session() as session:
+        task = session.query(Task).filter(Task.id == task_id).first()
+
+        session.delete(task)
+        session.commit()
+
+
+def get_task_by_id_db(task_id: int):
+    with get_session() as session:
+        return session.query(Task).filter(Task.id == task_id).first()
+
+
+def update_task_db(task_id: int, name: str):
+    with get_session() as session:
+        task = session.query(Task).filter(Task.id == task_id).first()
+        task.name = name
+        session.commit()
+        session.refresh(task)
+        return task
+

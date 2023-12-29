@@ -1,13 +1,13 @@
 from todo_list_app.api_router import ApiRouter
-from todo_list_app.contracts import CreateTaskList, CreateTask, UpdateTaskList
+from todo_list_app.contracts import CreateTaskList, CreateTask, UpdateTaskList, UpdateTask
 from todo_list_app.crud import create_task_list_db, get_task_list_by_id_db, create_task_db, update_task_list_db, \
-    get_tasks_by_list_id_db, delete_task_list_db
+    get_tasks_by_list_id_db, delete_task_list_db, get_task_by_id_db, update_task_db, delete_task_db
 from todo_list_app.database import get_session, TaskList, Task
 
 router = ApiRouter()
 
 
-@router.get('/task_list|task_list_id', private=True)
+@router.get('/task_list', private=True)
 def get_task_list(task_list_id: int, scope):
     token_data = scope['token_data']
     user_id = token_data['id']
@@ -24,6 +24,28 @@ def get_task_list(task_list_id: int, scope):
     else:
         if task_list.user_id == user_id:
             return {'user_id': task_list.user_id, 'list_id': task_list.id, 'list_name': task_list.name, 'task_ids': tasks}
+        else:
+            return {'error': 'You do not have permission to access this task list.'}
+
+
+@router.get('/task', private=True)
+def get_task(task_id: int, scope):
+    token_data = scope['token_data']
+    user_id = token_data['id']
+    user_role = token_data['role']
+
+    task = get_task_by_id_db(task_id)
+
+    if task is None:
+        return {'error': 'Task not found.'}
+
+    task_list = get_task_list_by_id_db(task.list_id)
+
+    if user_role == 'admin':
+        return {'task_id': task.id, 'task_name': task.name, 'list_id': task.list_id}
+    else:
+        if task_list.user_id == user_id:
+            return {'task_id': task.id, 'task_name': task.name, 'list_id': task.list_id}
         else:
             return {'error': 'You do not have permission to access this task list.'}
 
@@ -75,6 +97,26 @@ def update_task_list(updated_task_list: UpdateTaskList, scope):
     return {'updated_task_list_name': updated_task_list.name}
 
 
+@router.put('/update-task', private=True)
+def update_task(updated_task: UpdateTask, scope):
+    token_data = scope['token_data']
+    user_id = token_data['id']
+
+    task = get_task_by_id_db(updated_task.task_id)
+
+    if task is None:
+        return {'error': 'Task not found.'}
+
+    task_list = get_task_list_by_id_db(task.list_id)
+
+    if task_list.user_id != user_id:
+        return {'error': 'You do not have permission to update this task.'}
+
+    updated_task = update_task_db(updated_task.task_id, updated_task.name)
+
+    return {'updated_task_name': updated_task.name}
+
+
 @router.delete('/delete-task-list', private=True)
 def delete_task_list(list_id: int, scope):
     token_data = scope['token_data']
@@ -93,3 +135,25 @@ def delete_task_list(list_id: int, scope):
     delete_task_list_db(list_id)
 
     return {'message': f'Task list "{deleted_task_list_name}" deleted successfully.'}
+
+
+@router.delete('/delete-task', private=True)
+def delete_task(task_id: int, scope):
+    token_data = scope['token_data']
+    user_id = token_data['id']
+
+    task = get_task_by_id_db(task_id)
+
+    if task is None:
+        return {'error': 'Task not found.'}
+
+    task_list = get_task_list_by_id_db(task.list_id)
+
+    if task_list.user_id != user_id:
+        return {'error': 'You do not have permission to delete this task.'}
+
+    deleted_task_name = task.name
+
+    delete_task_db(task_id)
+
+    return {'message': f'Task "{deleted_task_name}" deleted successfully.'}
