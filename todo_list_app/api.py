@@ -2,7 +2,7 @@ from todo_list_app.api_router import ApiRouter
 from todo_list_app.contracts import CreateTaskList, CreateTask, UpdateTaskList, UpdateTask
 from todo_list_app.crud import create_task_list_db, get_task_list_by_id_db, create_task_db, update_task_list_db, \
     get_tasks_by_list_id_db, delete_task_list_db, get_task_by_id_db, update_task_db, delete_task_db
-from todo_list_app.database import get_session, TaskList, Task
+from todo_list_app.database import get_session, TaskList
 
 router = ApiRouter()
 

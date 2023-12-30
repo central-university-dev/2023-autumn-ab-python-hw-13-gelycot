@@ -3,3 +3,6 @@ make_migration:
 
 apply_migration:
 	 alembic -c ./todo_list_app/alembic.ini upgrade '$(hash)'
+
+test:
+	pytest --cov=todo_list_app

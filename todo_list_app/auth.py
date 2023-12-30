@@ -41,7 +41,3 @@ def login_for_access_token(user: LoginUser):
     else:
         return {'detail': 'Unauthorized'}
 
-
-@router.get('/get', private=False)
-def get_some():
-    return 'YES'
