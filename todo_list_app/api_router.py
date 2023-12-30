@@ -48,10 +48,9 @@ class ApiRouter:
 
         for route_info in self.routes:
             route_path, funk, requires_authentication = route_info
-
             if path + method == route_path:
                 if requires_authentication and not self._check_authentication(scope):
-                    body = 'Send correct jwt token'
+                    body = {'error': 'Send correct jwt token'}
                     break
                 kwargs = self._parse_data_into_kwargs(data, funk, scope)
                 body = funk(**kwargs)
