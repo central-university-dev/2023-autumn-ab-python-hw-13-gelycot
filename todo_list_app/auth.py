@@ -28,7 +28,8 @@ def login_for_access_token(user: LoginUser):
     provided_password = user.password
     with get_session() as session:
         db_user = session.query(User).filter(User.username == username).first()
-
+    if db_user is None:
+        return {'detail': f'There is no {username} user'}
     if bcrypt.checkpw(provided_password.encode('UTF-8'), db_user.password_hash.encode('UTF-8')):
         expiration_time = datetime.utcnow() + timedelta(minutes=10)
         token_payload = {

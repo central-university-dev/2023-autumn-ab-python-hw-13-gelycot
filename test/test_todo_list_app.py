@@ -20,7 +20,7 @@ def delete_temporary_user(username):
         session.commit()
 
 
-def test_auth():
+def test_should_auth():
     response = create_temporary_user()
     username = response['username']
 
@@ -34,7 +34,23 @@ def test_auth():
     delete_temporary_user(username)
 
 
-def test_create_task_list():
+def test_should_not_auth_nonexistent_user():
+
+    data = {'username': 'nonexistent_user', 'password': 'password'}
+    response = client.post('/token', data=data)
+    assert response['detail'] == 'There is no nonexistent_user user'
+
+
+def test_should_not_auth_wrong_password():
+    create_temporary_user()
+
+    data = {'username': 'test_user', 'password': 'wrong_password'}
+    response = client.post('/token', data=data)
+    assert response['detail'] == 'Unauthorized'
+    delete_temporary_user('test_user')
+
+
+def test_should_create_task_list():
     create_temporary_user()
 
     data = {'username': 'test_user', 'password': 'password'}
