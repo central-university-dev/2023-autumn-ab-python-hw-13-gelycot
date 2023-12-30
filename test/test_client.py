@@ -24,7 +24,7 @@ class TestClient:
         request_headers = []
         if headers is not None:
             for header, value in headers.items():
-                request_headers.append((header.encode('utf-8', value.encode('utf-8'))))
+                request_headers.append((header.encode('utf-8'), value.encode('utf-8')))
         scope = {'method': 'POST', 'headers': request_headers, 'path': path, 'type': 'http'}
         if data is None:
             data = {}
