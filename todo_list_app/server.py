@@ -14,6 +14,7 @@ class App:
         Echo the method and path back in an HTTP response.
         """
         assert scope['type'] == 'http'
+        self._parse_cookies(scope)
         if scope['method'] == 'GET':
             data = scope['query_string']
             if data:
@@ -24,10 +25,16 @@ class App:
             data = await self.read_body(receive)
         path = scope['path']
         body = self.api_router.check_api_route(scope, path, data)
+        headers = [(b'content-type', scope.get('content-type', 'application/json').encode('UTF-8'))]
+
+        if 'Set-Cookie' in scope:
+            for cookie in scope['Set-Cookie']:
+                headers.append(('Set-Cookie'.encode('UTF-8'), cookie.encode('UTF-8')))
 
         await send({
             'type': 'http.response.start',
-            'status': 200 if body != '' else 404,
+            'status': scope.get('status-code', 200),
+            'headers': headers
         })
         await send({
             'type': 'http.response.body',
@@ -57,6 +64,16 @@ class App:
         data_params = decoded_data.split('&')
         body = dict(param.split('=') for param in data_params)
         return body
+
+    @staticmethod
+    def _parse_cookies(scope):
+        for head in scope['headers']:
+            if b'cookie' in head:
+                cookies = head[1].decode('UTF-8')
+                cookie_pairs = cookies.split('; ')
+                for cookie_pair in cookie_pairs:
+                    key, value = cookie_pair.split('=')
+                    scope[key] = value
 
 
 app = App(api_router=router)
