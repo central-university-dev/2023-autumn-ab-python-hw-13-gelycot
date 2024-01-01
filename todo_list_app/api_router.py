@@ -10,24 +10,25 @@ from todo_list_app.config import JWT_SECRET_KEY
 
 class ApiRouter:
 
-    def __init__(self):
+    def __init__(self, prefix=''):
         self.routes = []
+        self.prefix= prefix
 
     def post(self, path, private=False):
         def wrapper(funk):
-            self.routes.append([path + 'POST', funk, private])
+            self.routes.append([self.prefix + path + 'POST', funk, private])
             return funk
         return wrapper
 
     def put(self, path, private=False):
         def wrapper(funk):
-            self.routes.append([path + 'PUT', funk, private])
+            self.routes.append([self.prefix + path + 'PUT', funk, private])
             return funk
         return wrapper
 
     def delete(self, path, private=False):
         def wrapper(funk):
-            self.routes.append([path + 'DELETE', funk, private])
+            self.routes.append([self.prefix + path + 'DELETE', funk, private])
             return funk
         return wrapper
 
@@ -37,7 +38,7 @@ class ApiRouter:
                 path = path_with_params[:path_with_params.index('|')]
             else:
                 path = path_with_params
-            self.routes.append([path + 'GET', funk, private])
+            self.routes.append([self.prefix + path + 'GET', funk, private])
             return funk
 
         return wrapper
@@ -49,7 +50,10 @@ class ApiRouter:
         for route_info in self.routes:
             route_path, funk, requires_authentication = route_info
             if path + method == route_path:
+
+                print(route_path, requires_authentication)
                 if requires_authentication and not self._check_authentication(scope):
+                    print('HEHEHEEHEHHRHEHJHJ')
                     body = {'error': 'Send correct jwt token'}
                     break
                 kwargs = self._parse_data_into_kwargs(data, funk, scope)

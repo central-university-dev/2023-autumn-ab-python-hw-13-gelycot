@@ -59,7 +59,7 @@ def test_should_create_task_list():
 
     task_list_data = {'name': 'New Task List'}
     headers = {'authentication': f'Bearer {token}'}
-    response = client.post('/create-task-list', data=task_list_data, headers=headers)
+    response = client.post('/api/create-task-list', data=task_list_data, headers=headers)
     assert response['task_list_name'] == 'New Task List' and type(response['task_list_id']) == int
     delete_temporary_user(username='test_user')
 
@@ -73,12 +73,12 @@ def test_should_get_task_list():
 
     task_list_data = {'name': 'New Task List'}
     headers = {'authentication': f'Bearer {token}'}
-    response = client.post('/create-task-list', data=task_list_data, headers=headers)
+    response = client.post('/api/create-task-list', data=task_list_data, headers=headers)
 
     task_list_id = response['task_list_id']
     headers = {'authentication': f'Bearer {token}'}
     data = {'task_list_id': task_list_id}
-    response = client.get('/task_list', headers=headers, data=data)
+    response = client.get('/api/task_list', headers=headers, data=data)
     assert response['list_name'] == 'New Task List'
     delete_temporary_user(username='test_user')
 
@@ -92,7 +92,7 @@ def test_send_wrong_jwt():
 
     task_list_data = {'name': 'New Task List'}
     headers = {'authentication': f'Bearer {token}'}
-    response = client.post('/create-task-list', data=task_list_data, headers=headers)
+    response = client.post('/api/create-task-list', data=task_list_data, headers=headers)
 
     assert response['error'] == 'Send correct jwt token'
     delete_temporary_user(username='test_user')
