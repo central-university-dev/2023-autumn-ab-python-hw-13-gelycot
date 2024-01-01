@@ -1,3 +1,5 @@
+from urllib.parse import parse_qs
+
 from todo_list_app.api_router import ApiRouter
 from todo_list_app.api_router import router
 from todo_list_app.auth import router as auth_router
@@ -18,12 +20,13 @@ class App:
         self._parse_cookies(scope)
         if scope['method'] == 'GET':
             data = scope['query_string']
-            if data:
-                data = self.parse_body(data)
-            else:
-                data = {}
         else:
             data = await self.read_body(receive)
+
+        if data:
+            data = self.parse_body(data)
+        else:
+            data = {}
         path = scope['path']
         body = self.api_router.check_api_route(scope, path, data)
         headers = [(b'content-type', scope.get('content-type', 'application/json').encode('UTF-8'))]
@@ -42,7 +45,8 @@ class App:
             'body': body.encode('UTF-8'),
         })
 
-    async def read_body(self, receive):
+    @staticmethod
+    async def read_body(receive):
         """
         Read and return the entire body from an incoming ASGI message.
         """
@@ -54,16 +58,14 @@ class App:
             body += message.get('body', b'')
             more_body = message.get('more_body', False)
 
-        if body:
-            body = self.parse_body(body)
-
         return body
 
     @staticmethod
     def parse_body(body):
         decoded_data = body.decode('UTF-8')
-        data_params = decoded_data.split('&')
-        body = dict(param.split('=') for param in data_params)
+        parsed_data = parse_qs(decoded_data)
+
+        body = {key: value[0] for key, value in parsed_data.items()}
         return body
 
     @staticmethod
