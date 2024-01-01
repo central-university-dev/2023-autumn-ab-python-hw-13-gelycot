@@ -94,5 +94,5 @@ def test_send_wrong_jwt():
     headers = {'authentication': f'Bearer {token}'}
     response = client.post('/api/create-task-list', data=task_list_data, headers=headers)
 
-    assert response['error'] == 'Send correct jwt token'
+    assert response['error'] == 'Send correct token'
     delete_temporary_user(username='test_user')

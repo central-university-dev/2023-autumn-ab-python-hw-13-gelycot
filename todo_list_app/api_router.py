@@ -6,6 +6,7 @@ import jwt
 from pydantic import BaseModel
 
 from todo_list_app.config import JWT_SECRET_KEY
+from todo_list_app.session_manager import session_manager
 
 
 class ApiRouter:
@@ -51,10 +52,8 @@ class ApiRouter:
             route_path, funk, requires_authentication = route_info
             if path + method == route_path:
 
-                print(route_path, requires_authentication)
-                if requires_authentication and not self._check_authentication(scope):
-                    print('HEHEHEEHEHHRHEHJHJ')
-                    body = {'error': 'Send correct jwt token'}
+                if requires_authentication and not (self._check_jwt_token(scope) or self._check_session_token(scope)):
+                    body = {'error': 'Send correct token'}
                     break
                 kwargs = self._parse_data_into_kwargs(data, funk, scope)
                 body = funk(**kwargs)
@@ -66,7 +65,7 @@ class ApiRouter:
         return body
 
     @staticmethod
-    def _check_authentication(scope):
+    def _check_jwt_token(scope):
         token = ''
         for head in scope['headers']:
             if b'authentication' in head:
@@ -86,6 +85,14 @@ class ApiRouter:
             return False
         except jwt.InvalidTokenError:
             return False
+
+    @staticmethod
+    def _check_session_token(scope):
+        session_token = scope.get('session_token')
+        user_id = session_manager.get_user_id(session_token)
+        if user_id:
+            return True
+        return False
 
     @staticmethod
     def _parse_data_into_kwargs(data, funk, scope):

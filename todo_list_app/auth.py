@@ -64,6 +64,7 @@ def send_login_form(scope):
 def check_login_form_data(username: str, password: str, csrf_token: str, scope):
     if scope['csrf_token'] != csrf_token:
         return 'Wrong csrf_token'
+    scope['Set-Cookie'] = [f'csrf_token=delete; Max-Age=0']
 
     username = username
     provided_password = password
@@ -76,17 +77,15 @@ def check_login_form_data(username: str, password: str, csrf_token: str, scope):
 
     if bcrypt.checkpw(provided_password.encode('UTF-8'), db_user.password_hash.encode('UTF-8')):
         session_token = session_manager.create_session(db_user.id)
-        scope['Set-Cookie'] = [f'session_token={session_token}']
+        scope['Set-Cookie'].append(f'session_token={session_token}')
         return f'Correct password. Welcome {username}'
     return 'Wrong password'
 
 
-@router.get('/logout')
+@router.get('/logout', private=True)
 def logout_user(scope):
     session_token = scope.get('session_token')
-    if session_token:
-        session_manager.delete_session(session_token)
-        scope['Set-Cookie'] = [f'session_token=deleted; Max-Age=0']
-        return 'You arу logged out'
-    return 'You did not log in'
+    session_manager.delete_session(session_token)
+    scope['Set-Cookie'] = [f'session_token=deleted; Max-Age=0']
+    return 'You are logged out'
 

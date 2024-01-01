@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task List Form</title>
+</head>
+<body>
+    <h1>Task List Form</h1>
+    <form method="post" action="/web/create-task-list">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label for="list_name">Task List Name:</label>
+        <input type="text" id="list_name" name="name" required><br>
+
+        <input type="submit" value="Create Task List">
+    </form>
+</body>
+</html>
