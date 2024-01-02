@@ -47,7 +47,7 @@ def get_task(task_id: int, scope):
         if task_list.user_id == user_id:
             return {'task_id': task.id, 'task_name': task.name, 'list_id': task.list_id}
         else:
-            return {'error': 'You do not have permission to access this task list.'}
+            return {'error': 'You do not have permission to access this task.'}
 
 
 @router.post('/create-task-list', private=True)

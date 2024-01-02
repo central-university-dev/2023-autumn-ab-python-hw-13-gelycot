@@ -38,5 +38,27 @@ class TestClient:
 
         return self.request(path, scope=scope, data=data)
 
+    def put(self, path, data: dict[str, str | int] = None,  headers: dict[str, str] = None):
+        request_headers = []
+        if headers is not None:
+            for header, value in headers.items():
+                request_headers.append((header.encode('utf-8'), value.encode('utf-8')))
+        scope = {'method': 'PUT', 'headers': request_headers, 'path': path, 'type': 'http'}
+        if data is None:
+            data = {}
+
+        return self.request(path, scope=scope, data=data)
+
+    def delete(self, path, data: dict[str, str | int] = None,  headers: dict[str, str] = None):
+        request_headers = []
+        if headers is not None:
+            for header, value in headers.items():
+                request_headers.append((header.encode('utf-8'), value.encode('utf-8')))
+        scope = {'method': 'DELETE', 'headers': request_headers, 'path': path, 'type': 'http'}
+        if data is None:
+            data = {}
+
+        return self.request(path, scope=scope, data=data)
+
 
 
