@@ -8,8 +8,8 @@ from todo_list_app.config import JWT_SECRET_KEY, env
 from todo_list_app.contracts import RegisterUser, RegisterUserResponse, LoginUser
 from todo_list_app.crud import create_user_db
 from todo_list_app.database import User, get_session
-from todo_list_app.api_router import ApiRouter
-from todo_list_app.session_manager import session_manager
+from todo_list_app.utils.api_router import ApiRouter
+from todo_list_app.utils.session_manager import session_manager
 
 router = ApiRouter()
 

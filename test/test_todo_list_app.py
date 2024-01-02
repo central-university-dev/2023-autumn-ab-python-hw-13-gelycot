@@ -3,7 +3,7 @@ from sqlalchemy import update
 from test.test_client import TestClient
 from todo_list_app.auth import generate_csrf_token
 from todo_list_app.database import get_session, User
-from todo_list_app.server import app
+from todo_list_app.asgi import app
 
 client = TestClient(app)
 

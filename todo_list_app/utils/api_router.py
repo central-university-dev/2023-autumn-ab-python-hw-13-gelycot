@@ -6,7 +6,7 @@ import jwt
 from pydantic import BaseModel
 
 from todo_list_app.config import JWT_SECRET_KEY
-from todo_list_app.session_manager import session_manager
+from todo_list_app.utils.session_manager import session_manager
 
 
 class ApiRouter:

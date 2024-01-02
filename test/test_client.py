@@ -1,6 +1,6 @@
 import json
 
-from todo_list_app.server import App
+from todo_list_app.utils.server import App
 
 
 class TestClient:
