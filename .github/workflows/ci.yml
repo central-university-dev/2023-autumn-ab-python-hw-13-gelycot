@@ -36,6 +36,6 @@ jobs:
           docker-compose exec -T test_server make apply_all_migrations
       - name: Run tests
         run: |
-          docker-compose exec test_server make test
+          docker-compose exec -T test_server make test
       - name: Stop containers
         run: docker-compose down
