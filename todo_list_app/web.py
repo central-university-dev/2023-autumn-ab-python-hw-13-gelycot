@@ -7,7 +7,7 @@ from todo_list_app.utils.session_manager import session_manager
 router = ApiRouter(prefix='/web')
 
 
-@router.get('/create-task-list', private=True)
+@router.get('/create-task-list', private=False)
 def get_task_list_form(scope):
     scope['content-type'] = 'text/html'
     csrf_token = generate_csrf_token()
@@ -18,7 +18,7 @@ def get_task_list_form(scope):
     return task_list_form_template
 
 
-@router.post('/create-task-list', private=True)
+@router.post('/create-task-list', private=False)
 def check_task_list_form(name: str, csrf_token: str, scope):
     scope['content-type'] = 'text/html'
     if scope['csrf_token'] != csrf_token:

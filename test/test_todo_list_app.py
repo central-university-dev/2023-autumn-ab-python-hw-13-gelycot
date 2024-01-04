@@ -675,3 +675,63 @@ def test_should_logout():
     response = client.get('/logout', scope_data=scope_data)
     assert response == 'You are logged out'
 
+
+def test_should_get_new_task_list_form():
+    response = create_temporary_user()
+
+    user_id = response['id']
+
+    session_token = session_manager.create_session(user_id)
+    scope_data = {'session_token': session_token}
+    response = client.get('/web/create-task-list', scope_data=scope_data)
+    assert '<h1>Task List Form</h1>' in response
+    assert '<label for="list_name">Task List Name:</label>' in response
+
+    delete_temporary_user('test_user')
+
+
+def test_should_web_create_task_list():
+    response = create_temporary_user()
+
+    user_id = response['id']
+
+    session_token = session_manager.create_session(user_id)
+    csrf_token = generate_csrf_token()
+    scope_data = {'session_token': session_token, 'csrf_token': csrf_token}
+    data = {'name': 'Task', 'csrf_token': csrf_token}
+
+    response = client.post('/web/create-task-list', data=data, scope_data=scope_data)
+    assert '<h1>New Task List Created</h1>' in response
+    assert '<p>Task List Name: Task</p>' in response
+    delete_temporary_user('test_user')
+
+
+def test_should_not_web_create_task_list():
+    response = create_temporary_user()
+
+    user_id = response['id']
+
+    session_token = session_manager.create_session(user_id)
+    csrf_token = generate_csrf_token()
+    scope_data = {'session_token': session_token, 'csrf_token': csrf_token}
+    data = {'name': 'Task', 'csrf_token': csrf_token + 'wrong'}
+
+    response = client.post('/web/create-task-list', data=data, scope_data=scope_data)
+    assert response == 'Wrong csrf_token'
+    delete_temporary_user('test_user')
+
+
+def test_should_parse_cookies():
+    scope = {'headers': [(b'cookie', b'cookie1=qwerty; cookie2=qwerty; cookie3=qwerty')]}
+    app._parse_cookies(scope)
+    assert scope['cookie1'] == 'qwerty'
+    assert scope['cookie2'] == 'qwerty'
+    assert scope['cookie3'] == 'qwerty'
+
+
+def test_should_parse_body():
+    data = b'key1=value1&key2=value2&key3=value3'
+    body = app.parse_body(data)
+    assert body['key1'] == 'value1'
+    assert body['key2'] == 'value2'
+    assert body['key3'] == 'value3'
