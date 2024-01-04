@@ -1,4 +1,12 @@
-from sqlalchemy import MetaData, Table, Column, Integer, String, ForeignKey, Enum, ForeignKeyConstraint
+from sqlalchemy import (
+    MetaData,
+    Table,
+    Column,
+    Integer,
+    String,
+    Enum,
+    ForeignKeyConstraint,
+)
 
 metadata = MetaData()
 
@@ -19,7 +27,7 @@ task_list = Table(
     Column('id', Integer, primary_key=True),
     Column('user_id', Integer),
     Column('name', String, nullable=False),
-    ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE')
+    ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
 )
 
 task = Table(
@@ -28,5 +36,5 @@ task = Table(
     Column('id', Integer, primary_key=True),
     Column('list_id', Integer),
     Column('name', String, nullable=False),
-    ForeignKeyConstraint(['list_id'], ['task_list.id'], ondelete='CASCADE')
+    ForeignKeyConstraint(['list_id'], ['task_list.id'], ondelete='CASCADE'),
 )

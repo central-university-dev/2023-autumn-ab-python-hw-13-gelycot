@@ -18,11 +18,18 @@ pytest = "^7.4.3"
 pytest-mock = "^3.12.0"
 pytest-cov = "^4.1.0"
 jinja2 = "^3.1.2"
+flake8 = "^6.1.0"
+black = "^23.12.1"
+bandit = "^1.7.6"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 79
+skip-string-normalization = true
 
 [tool.coverage.report]
 show_missing = true

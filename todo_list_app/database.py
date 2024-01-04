@@ -37,6 +37,3 @@ class Task(Base):
 def get_session():
     session = Session()
     return session
-
-
-

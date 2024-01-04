@@ -3,7 +3,9 @@ from todo_list_app.database import get_session, TaskList, Task, User
 
 def create_user_db(username, password_hash, salt):
     with get_session() as session:
-        new_user = User(username=username, password_hash=password_hash, salt=salt)
+        new_user = User(
+            username=username, password_hash=password_hash, salt=salt
+        )
         session.add(new_user)
         session.commit()
         session.refresh(new_user)
@@ -12,7 +14,9 @@ def create_user_db(username, password_hash, salt):
 
 def get_task_list_by_id_db(task_list_id):
     with get_session() as session:
-        task_list = session.query(TaskList).filter(TaskList.id == task_list_id).first()
+        task_list = (
+            session.query(TaskList).filter(TaskList.id == task_list_id).first()
+        )
         return task_list
 
 
@@ -44,7 +48,9 @@ def create_task_db(list_id, name):
 
 def update_task_list_db(task_list_id, new_name):
     with get_session() as session:
-        task_list = session.query(TaskList).filter(TaskList.id == task_list_id).first()
+        task_list = (
+            session.query(TaskList).filter(TaskList.id == task_list_id).first()
+        )
 
         task_list.name = new_name
         session.commit()
@@ -54,7 +60,9 @@ def update_task_list_db(task_list_id, new_name):
 
 def delete_task_list_db(task_list_id: int):
     with get_session() as session:
-        task_list = session.query(TaskList).filter(TaskList.id == task_list_id).first()
+        task_list = (
+            session.query(TaskList).filter(TaskList.id == task_list_id).first()
+        )
 
         session.delete(task_list)
         session.commit()
@@ -80,4 +88,3 @@ def update_task_db(task_id: int, name: str):
         session.commit()
         session.refresh(task)
         return task
-

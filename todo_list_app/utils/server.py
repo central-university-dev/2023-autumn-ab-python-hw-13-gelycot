@@ -4,7 +4,6 @@ from todo_list_app.utils.api_router import ApiRouter
 
 
 class App:
-
     def __init__(self, api_router: ApiRouter):
         self.api_router = api_router
 
@@ -12,7 +11,6 @@ class App:
         """
         Echo the method and path back in an HTTP response.
         """
-        assert scope['type'] == 'http'
         self._parse_cookies(scope)
         if scope['method'] == 'GET':
             data = scope['query_string']
@@ -25,21 +23,32 @@ class App:
             data = {}
         path = scope['path']
         body = self.api_router.check_api_route(scope, path, data)
-        headers = [(b'content-type', scope.get('content-type', 'application/json').encode('UTF-8'))]
+        headers = [
+            (
+                b'content-type',
+                scope.get('content-type', 'application/json').encode('UTF-8'),
+            )
+        ]
 
         if 'Set-Cookie' in scope:
             for cookie in scope['Set-Cookie']:
-                headers.append(('Set-Cookie'.encode('UTF-8'), cookie.encode('UTF-8')))
+                headers.append(
+                    ('Set-Cookie'.encode('UTF-8'), cookie.encode('UTF-8'))
+                )
 
-        await send({
-            'type': 'http.response.start',
-            'status': scope.get('status-code', 200),
-            'headers': headers
-        })
-        await send({
-            'type': 'http.response.body',
-            'body': body.encode('UTF-8'),
-        })
+        await send(
+            {
+                'type': 'http.response.start',
+                'status': scope.get('status-code', 200),
+                'headers': headers,
+            }
+        )
+        await send(
+            {
+                'type': 'http.response.body',
+                'body': body.encode('UTF-8'),
+            }
+        )
 
     @staticmethod
     async def read_body(receive):
@@ -73,5 +82,3 @@ class App:
                 for cookie_pair in cookie_pairs:
                     key, value = cookie_pair.split('=')
                     scope[key] = value
-
-

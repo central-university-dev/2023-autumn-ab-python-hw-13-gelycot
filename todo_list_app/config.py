@@ -3,6 +3,7 @@ import secrets
 
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader
+
 module_dir = os.path.dirname(__file__)
 
 dotenv_path = os.path.join(module_dir, '..', '.env')
@@ -19,4 +20,4 @@ JWT_SECRET_KEY = secrets.token_urlsafe(32)
 
 
 templates_dir = os.path.join(module_dir, 'templates')
-env = Environment(loader=FileSystemLoader(templates_dir))
+env = Environment(loader=FileSystemLoader(templates_dir), autoescape=True)

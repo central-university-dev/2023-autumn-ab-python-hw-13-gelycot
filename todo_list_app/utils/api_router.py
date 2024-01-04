@@ -10,33 +10,35 @@ from todo_list_app.utils.session_manager import session_manager
 
 
 class ApiRouter:
-
     def __init__(self, prefix=''):
         self.routes = []
-        self.prefix= prefix
+        self.prefix = prefix
 
     def post(self, path, private=False):
         def wrapper(funk):
             self.routes.append([self.prefix + path + 'POST', funk, private])
             return funk
+
         return wrapper
 
     def put(self, path, private=False):
         def wrapper(funk):
             self.routes.append([self.prefix + path + 'PUT', funk, private])
             return funk
+
         return wrapper
 
     def delete(self, path, private=False):
         def wrapper(funk):
             self.routes.append([self.prefix + path + 'DELETE', funk, private])
             return funk
+
         return wrapper
 
     def get(self, path_with_params: str, private=False):
         def wrapper(funk):
             if '|' in path_with_params:
-                path = path_with_params[:path_with_params.index('|')]
+                path = path_with_params[: path_with_params.index('|')]
             else:
                 path = path_with_params
             self.routes.append([self.prefix + path + 'GET', funk, private])
@@ -51,8 +53,10 @@ class ApiRouter:
         for route_info in self.routes:
             route_path, funk, requires_authentication = route_info
             if path + method == route_path:
-
-                if requires_authentication and not (self._check_jwt_token(scope) or self._check_session_token(scope)):
+                if requires_authentication and not (
+                    self._check_jwt_token(scope)
+                    or self._check_session_token(scope)
+                ):
                     body = {'error': 'Send correct token'}
                     break
                 kwargs = self._parse_data_into_kwargs(data, funk, scope)
@@ -65,13 +69,20 @@ class ApiRouter:
         return body
 
     @staticmethod
-    def _check_jwt_token(scope):
-        token = ''
+    def _get_jwt_token(scope):
+        token = None
         for head in scope['headers']:
             if b'authentication' in head:
                 token = head[1].decode('UTF-8').split()[1]
+        return token
+
+    def _check_jwt_token(self, scope):
+        token = self._get_jwt_token(scope)
+
         try:
-            decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+            decoded_token = jwt.decode(
+                token, JWT_SECRET_KEY, algorithms=['HS256']
+            )
 
             current_time = datetime.utcnow()
             expiration_time = decoded_token.get('exp', 0)
@@ -101,7 +112,9 @@ class ApiRouter:
                 data['scope'] = scope
             elif param.name not in data:
                 addition_kwarg = {}
-                for param_name in inspect.signature(param.annotation).parameters.keys():
+                for param_name in inspect.signature(
+                    param.annotation
+                ).parameters.keys():
                     addition_kwarg[param_name] = data[param_name]
                     del data[param_name]
 

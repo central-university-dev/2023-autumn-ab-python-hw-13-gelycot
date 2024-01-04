@@ -11,3 +11,10 @@ apply_all_migrations:
 
 test:
 	pytest -v --cov=todo_list_app
+
+lint:
+	black --check .
+	flake8 todo_list_app test
+
+security_checks:
+	bandit -r todo_list_app
