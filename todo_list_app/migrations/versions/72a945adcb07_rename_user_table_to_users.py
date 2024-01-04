@@ -32,7 +32,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('username'),
     )
-    op.drop_constraint('task_list_user_id_fkey', 'task_list', type_='foreignkey')
+    op.drop_constraint(
+        'task_list_user_id_fkey', 'task_list', type_='foreignkey'
+    )
     op.drop_table('user')
     op.create_foreign_key(None, 'task_list', 'users', ['user_id'], ['id'])
     # ### end Alembic commands ###
