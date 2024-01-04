@@ -84,13 +84,8 @@ class ApiRouter:
                 token, JWT_SECRET_KEY, algorithms=['HS256']
             )
 
-            current_time = datetime.utcnow()
-            expiration_time = decoded_token.get('exp', 0)
-            if current_time < datetime.utcfromtimestamp(expiration_time):
-                scope['token_data'] = decoded_token
-                return True
-            else:
-                return False
+            scope['token_data'] = decoded_token
+            return True
 
         except jwt.ExpiredSignatureError:
             return False

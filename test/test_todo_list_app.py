@@ -1,7 +1,11 @@
+from datetime import datetime, timedelta
+
+import jwt
 from sqlalchemy import update
 
 from test.test_client import TestClient
 from todo_list_app.auth import generate_csrf_token
+from todo_list_app.config import JWT_SECRET_KEY
 from todo_list_app.database import get_session, User
 from todo_list_app.asgi import app
 from todo_list_app.utils.session_manager import session_manager
@@ -735,3 +739,25 @@ def test_should_parse_body():
     assert body['key1'] == 'value1'
     assert body['key2'] == 'value2'
     assert body['key3'] == 'value3'
+
+
+def test_should_send_expired_jwt_token():
+    response = create_temporary_user()
+    expiration_time = datetime.utcnow()
+    token_payload = {
+        'id': response['id'],
+        'role': 'user',
+        'exp': expiration_time,
+    }
+    token = jwt.encode(
+        token_payload, JWT_SECRET_KEY, algorithm='HS256'
+    )
+
+    task_list_data = {'name': 'New Task List'}
+    headers = {'authentication': f'Bearer {token}'}
+    response = client.post(
+        '/api/create-task-list', data=task_list_data, headers=headers
+    )
+
+    assert response['error'] == 'Send correct token'
+    delete_temporary_user(username='test_user')
