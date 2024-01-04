@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import jwt
 from sqlalchemy import update
@@ -646,7 +646,11 @@ def test_should_get_auth_web_form():
 def test_should_web_auth():
     create_temporary_user('test_user')
     csrf_token = generate_csrf_token()
-    data = {'username': 'test_user', 'password': 'password', 'csrf_token': csrf_token}
+    data = {
+        'username': 'test_user',
+        'password': 'password',
+        'csrf_token': csrf_token,
+    }
     scope_data = {'csrf_token': csrf_token}
     response = client.post('/login', data=data, scope_data=scope_data)
     assert response == 'Correct password. Welcome test_user'
@@ -656,17 +660,29 @@ def test_should_web_auth():
 def test_should_not_web_auth():
     create_temporary_user('test_user')
     csrf_token = generate_csrf_token()
-    data = {'username': 'test_user', 'password': 'wrong_password', 'csrf_token': csrf_token}
+    data = {
+        'username': 'test_user',
+        'password': 'wrong_password',
+        'csrf_token': csrf_token,
+    }
     scope_data = {'csrf_token': csrf_token}
     response = client.post('/login', data=data, scope_data=scope_data)
     assert response == 'Wrong password'
 
-    data = {'username': 'test_user', 'password': 'password', 'csrf_token': csrf_token + 'wrong'}
+    data = {
+        'username': 'test_user',
+        'password': 'password',
+        'csrf_token': csrf_token + 'wrong',
+    }
     scope_data = {'csrf_token': csrf_token}
     response = client.post('/login', data=data, scope_data=scope_data)
     assert response == 'Wrong csrf_token'
 
-    data = {'username': 'nonexistent_user', 'password': 'password', 'csrf_token': csrf_token}
+    data = {
+        'username': 'nonexistent_user',
+        'password': 'password',
+        'csrf_token': csrf_token,
+    }
     scope_data = {'csrf_token': csrf_token}
     response = client.post('/login', data=data, scope_data=scope_data)
     assert response == 'There is no nonexistent_user user'
@@ -704,7 +720,9 @@ def test_should_web_create_task_list():
     scope_data = {'session_token': session_token, 'csrf_token': csrf_token}
     data = {'name': 'Task', 'csrf_token': csrf_token}
 
-    response = client.post('/web/create-task-list', data=data, scope_data=scope_data)
+    response = client.post(
+        '/web/create-task-list', data=data, scope_data=scope_data
+    )
     assert '<h1>New Task List Created</h1>' in response
     assert '<p>Task List Name: Task</p>' in response
     delete_temporary_user('test_user')
@@ -720,13 +738,19 @@ def test_should_not_web_create_task_list():
     scope_data = {'session_token': session_token, 'csrf_token': csrf_token}
     data = {'name': 'Task', 'csrf_token': csrf_token + 'wrong'}
 
-    response = client.post('/web/create-task-list', data=data, scope_data=scope_data)
+    response = client.post(
+        '/web/create-task-list', data=data, scope_data=scope_data
+    )
     assert response == 'Wrong csrf_token'
     delete_temporary_user('test_user')
 
 
 def test_should_parse_cookies():
-    scope = {'headers': [(b'cookie', b'cookie1=qwerty; cookie2=qwerty; cookie3=qwerty')]}
+    scope = {
+        'headers': [
+            (b'cookie', b'cookie1=qwerty; cookie2=qwerty; cookie3=qwerty')
+        ]
+    }
     app._parse_cookies(scope)
     assert scope['cookie1'] == 'qwerty'
     assert scope['cookie2'] == 'qwerty'
@@ -749,9 +773,7 @@ def test_should_send_expired_jwt_token():
         'role': 'user',
         'exp': expiration_time,
     }
-    token = jwt.encode(
-        token_payload, JWT_SECRET_KEY, algorithm='HS256'
-    )
+    token = jwt.encode(token_payload, JWT_SECRET_KEY, algorithm='HS256')
 
     task_list_data = {'name': 'New Task List'}
     headers = {'authentication': f'Bearer {token}'}
