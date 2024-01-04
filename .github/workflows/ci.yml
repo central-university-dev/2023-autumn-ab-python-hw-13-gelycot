@@ -1,0 +1,44 @@
+name: Ci Checks
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  style_check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.11" ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create .env file
+        run: echo "DB_HOST=localhost" >> .env && echo "DB_NAME=postgres_todo_list" >> .env && echo "DB_USER=postgres" >> .env && echo "DB_PASS=postgres" >> .env
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.create false
+      - name: Install dependencies
+        run: |
+          poetry install
+      - name: Start test_server container
+        run: |
+          docker-compose up -d test_server
+      - name: Style checking
+        run: |
+          docker-compose exec -T test_server make lint
+      - name: Apply db migrations
+        run: |
+          docker-compose exec -T test_server make apply_all_migrations
+      - name: Run tests
+        run: |
+          docker-compose exec -T test_server make test
+      - name: Stop containers
+        run: docker-compose down
