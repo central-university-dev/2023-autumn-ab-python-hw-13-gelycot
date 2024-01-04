@@ -4,19 +4,24 @@ from todo_list_app.utils.server import App
 
 
 class TestClient:
+    __test__ = False
+
     def __init__(self, app: App):
         self.app = app
 
     def request(self, path, data=None, scope=None):
-        return json.loads(
-            self.app.api_router.check_api_route(scope, path, data)
-        )
+        response = self.app.api_router.check_api_route(scope, path, data)
+
+        if scope.get('content-type', 'application/json') == 'application/json':
+            response = json.loads(response)
+        return response
 
     def get(
         self,
         path,
         data: dict[str, str | int] = None,
         headers: dict[str, str] = None,
+        scope_data: dict[str, str] = None,
     ):
         request_headers = []
         if headers is not None:
@@ -30,6 +35,8 @@ class TestClient:
             'path': path,
             'type': 'http',
         }
+        if scope_data is not None:
+            scope.update(scope_data)
         if data is None:
             data = {}
 
@@ -40,6 +47,7 @@ class TestClient:
         path,
         data: dict[str, str | int] = None,
         headers: dict[str, str] = None,
+        scope_data: dict[str, str] = None,
     ):
         request_headers = []
         if headers is not None:
@@ -53,6 +61,8 @@ class TestClient:
             'path': path,
             'type': 'http',
         }
+        if scope_data is not None:
+            scope.update(scope_data)
         if data is None:
             data = {}
 
@@ -63,6 +73,7 @@ class TestClient:
         path,
         data: dict[str, str | int] = None,
         headers: dict[str, str] = None,
+        scope_data: dict[str, str] = None,
     ):
         request_headers = []
         if headers is not None:
@@ -76,6 +87,8 @@ class TestClient:
             'path': path,
             'type': 'http',
         }
+        if scope_data is not None:
+            scope.update(scope_data)
         if data is None:
             data = {}
 
@@ -86,6 +99,7 @@ class TestClient:
         path,
         data: dict[str, str | int] = None,
         headers: dict[str, str] = None,
+        scope_data: dict[str, str] = None,
     ):
         request_headers = []
         if headers is not None:
@@ -99,6 +113,8 @@ class TestClient:
             'path': path,
             'type': 'http',
         }
+        if scope_data is not None:
+            scope.update(scope_data)
         if data is None:
             data = {}
 

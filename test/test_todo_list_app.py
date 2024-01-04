@@ -4,6 +4,7 @@ from test.test_client import TestClient
 from todo_list_app.auth import generate_csrf_token
 from todo_list_app.database import get_session, User
 from todo_list_app.asgi import app
+from todo_list_app.utils.session_manager import session_manager
 
 client = TestClient(app)
 
@@ -627,3 +628,50 @@ def test_should_not_delete_task_without_permission():
 def test_generate_csrf_token():
     csrf_token = generate_csrf_token()
     assert isinstance(csrf_token, str) and len(csrf_token) == 22
+
+
+def test_should_get_auth_web_form():
+    create_temporary_user('test_user')
+    response = client.get('/login')
+    assert '<title>Login Form</title>' in response
+    assert '<label for="username">Username:</label>' in response
+    assert '<label for="password">Password:</label>' in response
+    delete_temporary_user('test_user')
+
+
+def test_should_web_auth():
+    create_temporary_user('test_user')
+    csrf_token = generate_csrf_token()
+    data = {'username': 'test_user', 'password': 'password', 'csrf_token': csrf_token}
+    scope_data = {'csrf_token': csrf_token}
+    response = client.post('/login', data=data, scope_data=scope_data)
+    assert response == 'Correct password. Welcome test_user'
+    delete_temporary_user('test_user')
+
+
+def test_should_not_web_auth():
+    create_temporary_user('test_user')
+    csrf_token = generate_csrf_token()
+    data = {'username': 'test_user', 'password': 'wrong_password', 'csrf_token': csrf_token}
+    scope_data = {'csrf_token': csrf_token}
+    response = client.post('/login', data=data, scope_data=scope_data)
+    assert response == 'Wrong password'
+
+    data = {'username': 'test_user', 'password': 'password', 'csrf_token': csrf_token + 'wrong'}
+    scope_data = {'csrf_token': csrf_token}
+    response = client.post('/login', data=data, scope_data=scope_data)
+    assert response == 'Wrong csrf_token'
+
+    data = {'username': 'nonexistent_user', 'password': 'password', 'csrf_token': csrf_token}
+    scope_data = {'csrf_token': csrf_token}
+    response = client.post('/login', data=data, scope_data=scope_data)
+    assert response == 'There is no nonexistent_user user'
+    delete_temporary_user('test_user')
+
+
+def test_should_logout():
+    session_token = session_manager.create_session(1)
+    scope_data = {'session_token': session_token}
+    response = client.get('/logout', scope_data=scope_data)
+    assert response == 'You are logged out'
+

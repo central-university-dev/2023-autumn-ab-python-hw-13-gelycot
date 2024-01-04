@@ -77,6 +77,7 @@ def send_login_form(scope):
 def check_login_form_data(
     username: str, password: str, csrf_token: str, scope
 ):
+    scope['content-type'] = 'text/html'
     if scope['csrf_token'] != csrf_token:
         return 'Wrong csrf_token'
     scope['Set-Cookie'] = ['csrf_token=delete; Max-Age=0']
@@ -102,6 +103,7 @@ def check_login_form_data(
 
 @router.get('/logout', private=True)
 def logout_user(scope):
+    scope['content-type'] = 'text/html'
     session_token = scope.get('session_token')
     session_manager.delete_session(session_token)
     scope['Set-Cookie'] = ['session_token=deleted; Max-Age=0']
